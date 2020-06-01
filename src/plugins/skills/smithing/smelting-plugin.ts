@@ -30,7 +30,7 @@ const BRONZE : Bar = {
         { itemId: itemIds.copperOre, amount: 1 },
         { itemId: itemIds.tinOre, amount: 1 }
     ]
-};
+}
 
 const BLURITE : Bar = {
     barId: itemIds.bluriteBar,

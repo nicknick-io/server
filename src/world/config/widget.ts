@@ -14,6 +14,12 @@ export const widgets: any = {
             slot8: { modelId: 12, titleId: 48 },
         }
     },
+    anvil: {
+        widgetId: 312,
+        slots: {
+            slot0: { modelId: 1119, titleId: 0 },
+        }
+    },
     inventory: {
         widgetId: 149,
         containerId: 0

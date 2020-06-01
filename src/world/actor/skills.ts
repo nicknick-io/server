@@ -88,6 +88,10 @@ export class Skills {
         return this.values[skillId].level >= level;
     }
 
+    public getSkillLevel(skillId: number): number {
+        return this.values[skillId].level;
+    }
+
     public getLevelForExp(exp: number): number {
         let points = 0;
         let output = 0;
