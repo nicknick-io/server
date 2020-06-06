@@ -1,8 +1,8 @@
 import { Actor } from '@server/world/actor/actor';
 import { Player } from '@server/world/actor/player/player';
-import { dialogueAction } from '@server/world/actor/player/action/dialogue-action';
 import { startsWithVowel } from '@server/util/strings';
 import { serverConfig } from '@server/game-server';
+import { gfxIds } from '@server/world/config/gfx-ids';
 
 export enum Skill {
     ATTACK,
@@ -82,6 +82,15 @@ export class Skills {
         skillDetails.forEach(s => values.push({ exp: 0, level: 1 }));
         values[Skill.HITPOINTS] = { exp: 1154, level: 10 };
         return values;
+    }
+
+    /*
+     * @TODO make an additional field for boostedLevel that this reads from
+     *   Also add a new method to get the unboostedLevel incase it's ever needed
+     *   Then think about some way to reliably and easily fade those boosts out over time
+     */
+    public getSkillLevel(skillId: number, level: number): number {
+        return this.values[skillId].level;
     }
 
     public hasSkillLevel(skillId: number, level: number): boolean {
@@ -164,7 +173,7 @@ export class Skills {
                     text: `Your ${skillName} level is now ${level}.` });
             },
             afterOpened: () => {
-                player.playGraphics({ id: 199, delay: 0, height: 125 });
+                player.playGraphics({ id: gfxIds.levelUpFireworks, delay: 0, height: 125 });
                 // @TODO sounds
             }
         });
