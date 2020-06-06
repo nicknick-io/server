@@ -177,9 +177,27 @@ const widgetButtonIds : Map<number, Smeltable> = new Map<number, Smeltable>([
 // We need to tell the widget what the bars actually look like.
 const loadSmeltingInterface = (details: ObjectActionDetails) => {
     const theKnightsSwordQuest = details.player.quests.find(quest => quest.questId === 'theKnightsSword');
+
+    // @TODO: Added for debug purposes...
+    try {
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot1.modelId, itemIds.bluriteBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot2.modelId, itemIds.ironBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot3.modelId, itemIds.silverBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot4.modelId, itemIds.steelBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot5.modelId, itemIds.goldBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot6.modelId, itemIds.mithrilBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot7.modelId, itemIds.adamantiteBar, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, widgets.furnace.slots.slot8.modelId, itemIds.runiteBar, 135);
+    } catch (e) {
+        console.log(e);
+    }
+
+
     // Send the items to the widget.
-    widgetItems.forEach((item) => {
-        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, item.slot.modelId, item.bar.barId, 125);
+    /*widgetItems.forEach((item) => {
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, item.slot.modelId, item.bar.barId, 135);
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, item.slot.modelId, item.bar.barId, 10);
+
         if (!details.player.skills.hasSkillLevel(Skill.SMITHING, item.bar.requiredLevel)) {
             details.player.modifyWidget(widgets.furnace.widgetId, { childId: item.slot.titleId, textColor: colors.red});
         } else {
@@ -189,7 +207,7 @@ const loadSmeltingInterface = (details: ObjectActionDetails) => {
         if (item.bar.quest !== undefined && (theKnightsSwordQuest == undefined || theKnightsSwordQuest.stage !== 'COMPLETE')) {
             details.player.modifyWidget(widgets.furnace.widgetId, { childId: item.slot.titleId, textColor: colors.red});
         }
-    });
+    });*/
 };
 
 const hasIngredients = (details: ButtonActionDetails, ingredients: Item[], inventory: ItemContainer, loop) => {
