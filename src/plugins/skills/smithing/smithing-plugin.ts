@@ -4,7 +4,7 @@ import { itemOnObjectAction } from '@server/world/actor/player/action/item-on-ob
 import { ActionType, RunePlugin } from '@server/plugins/plugin';
 import { widgets } from '@server/world/config/widget';
 import { Skill } from '@server/world/actor/skills';
-import { buttonAction } from '@server/world/actor/player/action/button-action';
+import { itemAction } from "@server/world/actor/player/action/item-action";
 
 
 interface Smithable {
@@ -234,7 +234,7 @@ const smithables : Map<string, Map<string, Smithable>> = new Map<string, Map<str
         ['rune', { level: 99, experience: 225, item: { itemId: itemIds.runitePlatebody, amount: 1 }, ingredient: { itemId: itemIds.runiteBar, amount: 5 } }],
     ])],
     ['unknown', new Map<string, Smithable>([
-        ['any', { level: 1, experience: 0, item: { itemId: 0, amount: 1 }, ingredient: { itemId: itemIds.bronzeBar, amount: 1 } }]
+        ['any', { level: 1, experience: 0, item: { itemId: -1, amount: -1 }, ingredient: { itemId: itemIds.bronzeBar, amount: 1 } }]
     ])],
 ]);
 
@@ -493,11 +493,21 @@ const widgetItems : Map<number, Map<number, Smithable[]>> = new Map<number, Map<
     ])]
 ]);
 
-const widgetButtonIds : Map<number, SmithableOption> = new Map<number, SmithableOption>([
-]);
+const mapWidgetItemsToFlatArray = (input) => {
+    let result = [];
+    smithables.forEach((type) => {
+        type.forEach((smithable) => {
+            result.push(smithable.item.itemId);
+        });
+    });
+    return result;
+};
 
-const buttonClicked : buttonAction = (details) => {
-    console.log(details);
+const optionClicked : itemAction = (details) => {
+    const { option, itemSlot, itemDetails } = details;
+    console.log('option', option);
+    console.log('slot', itemSlot);
+    console.log('item', itemDetails);
 };
 
 const anvilAction : itemOnObjectAction = (details) => {
@@ -519,6 +529,9 @@ const anvilAction : itemOnObjectAction = (details) => {
             }, index, smithable.item);
         });
     });
+
+    player.modifyWidget(widgets.anvil.widgetId, { childId: 146, hidden: true });
+
 };
 
 
@@ -528,5 +541,10 @@ export default new RunePlugin([
         itemIds: barIds,
         objectIds: anvilIds,
         action: anvilAction
+    },
+    {
+        type: ActionType.ITEM_ACTION,
+        itemIds: [...mapWidgetItemsToFlatArray(widgetItems)],
+        action: optionClicked
     }
 ])
