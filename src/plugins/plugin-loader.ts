@@ -1,6 +1,5 @@
-import * as fs from 'fs';
-import * as util from 'util';
-import { RunePlugin, RunePluginAction } from '@server/plugins/plugin';
+import { RunePlugin } from '@server/plugins/plugin';
+import { getFiles } from '@server/util/files';
 
 
 export const basicStringFilter = (pluginValues: string | string[], searchValue: string): boolean => {
@@ -55,56 +54,23 @@ export const pluginFilter = (pluginIds: number | number[], searchId: number, plu
     }
 };
 
-const readdir = util.promisify(fs.readdir);
-const stat = util.promisify(fs.stat);
-const blacklist = ['plugin-loader.js', 'plugin.js'];
+const blacklist = ['plugin-loader.js', 'plugin.js', 'rune.js'];
 
-async function* getFiles(directory: string): AsyncGenerator<string> {
-    const files = await readdir(directory);
+export const PLUGIN_DIRECTORY = './dist/plugins';
 
-    for(const file of files) {
-        const invalid = blacklist.some(component => file === component || file.endsWith('.map'));
-
-        if(invalid) {
-            continue;
-        }
-
-        const path = directory + '/' + file;
-        const statistics = await stat(path);
-
-        if(statistics.isDirectory()) {
-            for await (const child of getFiles(path)) {
-                yield child;
-            }
-        } else {
-            yield path;
-        }
-    }
-}
-
-export const JS_PLUGIN_DIRECTORY = 'plugins';
-
-export async function loadJSPlugins(): Promise<RunePlugin[]> {
+export async function loadPlugins(): Promise<RunePlugin[]> {
     const plugins: RunePlugin[] = [];
 
-    for await(const path of getFiles(JS_PLUGIN_DIRECTORY)) {
-        const location = '../../' + path;
-        const actions: RunePluginAction | RunePluginAction[] = (require(location));
-        plugins.push(new RunePlugin(actions));
-    }
-
-    return plugins;
-}
-
-export const TS_PLUGIN_DIRECTORY = './dist/plugins';
-
-export async function loadTSPlugins(): Promise<RunePlugin[]> {
-    const plugins: RunePlugin[] = [];
-
-    for await(const path of getFiles(TS_PLUGIN_DIRECTORY)) {
-        const location = '.' + path.substring(TS_PLUGIN_DIRECTORY.length).replace('.js', '');
+    for await(const path of getFiles(PLUGIN_DIRECTORY, blacklist)) {
+        const location = '.' + path.substring(PLUGIN_DIRECTORY.length).replace('.js', '');
         const plugin = require(location);
-        plugins.push(plugin.default as RunePlugin);
+        if(plugin.default) {
+            // TS plugin
+            plugins.push(plugin.default as RunePlugin);
+        } else {
+            // JS plugin
+            plugins.push(new RunePlugin(plugin));
+        }
     }
 
     return plugins;

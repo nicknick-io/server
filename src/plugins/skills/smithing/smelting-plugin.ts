@@ -6,13 +6,13 @@ import { objectAction, ObjectActionDetails } from '@server/world/actor/player/ac
 import { widgets } from '@server/world/config/widget';
 import { buttonAction, ButtonActionDetails } from '@server/world/actor/player/action/button-action';
 import { itemIds } from '@server/world/config/item-ids';
-import { Subscription } from 'rxjs';
 import { Skill } from '@server/world/actor/skills';
 import { cache } from '@server/game-server';
 import { loopingAction } from '@server/world/actor/player/action/action';
 import { animationIds } from '@server/world/config/animation-ids';
 import { soundIds } from '@server/world/config/sound-ids';
 import { colors } from '@server/util/colors';
+import {Subscription} from "rxjs";
 
 export interface Bar {
     barId: number;
@@ -30,7 +30,7 @@ const BRONZE : Bar = {
         { itemId: itemIds.copperOre, amount: 1 },
         { itemId: itemIds.tinOre, amount: 1 }
     ]
-}
+};
 
 const BLURITE : Bar = {
     barId: itemIds.bluriteBar,
@@ -177,19 +177,15 @@ const widgetButtonIds : Map<number, Smeltable> = new Map<number, Smeltable>([
 // We need to tell the widget what the bars actually look like.
 const loadSmeltingInterface = (details: ObjectActionDetails) => {
     const theKnightsSwordQuest = details.player.quests.find(quest => quest.questId === 'theKnightsSword');
-
+    // Send the items to the widget.
     widgetItems.forEach((item) => {
-        // Push item to the widget.
-        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, item.slot.modelId, item.bar.barId, 135);
-
-        // Change the color of the item texts corresponding with the bars.
-        if (!details.player.skills.hasSkillLevel(Skill.SMITHING, item.bar.requiredLevel)) {
+        details.player.outgoingPackets.setItemOnWidget(widgets.furnace.widgetId, item.slot.modelId, item.bar.barId, 125);
+        if (!details.player.skills.hasLevel(Skill.SMITHING, item.bar.requiredLevel)) {
             details.player.modifyWidget(widgets.furnace.widgetId, { childId: item.slot.titleId, textColor: colors.red});
         } else {
             details.player.modifyWidget(widgets.furnace.widgetId, { childId: item.slot.titleId, textColor: colors.black});
         }
-
-        // Check if the player has completed 'The Knight's Sword' quest, even if the level is high enough.
+        // Check if the player has completed 'The Knight's Sword' quest, even if the level is okay.
         if (item.bar.quest !== undefined && (theKnightsSwordQuest == undefined || theKnightsSwordQuest.stage !== 'COMPLETE')) {
             details.player.modifyWidget(widgets.furnace.widgetId, { childId: item.slot.titleId, textColor: colors.red});
         }
@@ -208,7 +204,7 @@ const hasIngredients = (details: ButtonActionDetails, ingredients: Item[], inven
 };
 
 const canSmelt = (details: ButtonActionDetails, bar: Bar): boolean =>  {
-    return details.player.skills.hasSkillLevel(Skill.SMITHING, bar.requiredLevel);
+    return details.player.skills.hasLevel(Skill.SMITHING, bar.requiredLevel);
 };
 
 const smeltProduct = (details: ButtonActionDetails, bar: Bar, count: number) => {

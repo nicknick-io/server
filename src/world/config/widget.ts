@@ -37,7 +37,10 @@ export const widgets: any = {
         containerId: 0
     },
     bank: {
-        screenWidget: 12,
+        screenWidget: {
+            widgetId: 12,
+            containerId: 89,
+        },
         tabWidget: {
             widgetId: 266,
             containerId: 0
@@ -89,6 +92,7 @@ export const widgetScripts = {
     runMode: 173,
     splitPrivateChat: 287,
     bankInsertMode: 304,
+    bankWithdrawNoteMode: 115,
     acceptAid: 427,
     areaEffectVolume: 872,
     questPoints: 101

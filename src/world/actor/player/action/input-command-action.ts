@@ -1,5 +1,6 @@
 import { Player } from '../player';
 import { ActionPlugin } from '@server/plugins/plugin';
+import { logger } from '@runejs/logger';
 
 /**
  * The definition for a command action function.
@@ -39,7 +40,7 @@ export interface CommandActionPlugin extends ActionPlugin {
 /**
  * A directory of all command interaction plugins.
  */
-let commandInteractions: CommandActionPlugin[] = [];
+export let commandInteractions: CommandActionPlugin[] = [];
 
 /**
  * Sets the list of command interaction plugins.
@@ -116,6 +117,7 @@ export const inputCommandAction = (player: Player, command: string, isConsole: b
             }
         } catch (commandError) {
             player.sendLogMessage(`Command error: ${commandError}`, isConsole);
+            logger.error(commandError);
         }
     });
 };

@@ -64,11 +64,9 @@ export class World {
         this.setupWorldTick();
     }
 
-    public init(): void {
-        new Promise(resolve => {
+    public async init(): Promise<void> {
+        await new Promise(() => {
             this.chunkManager.generateCollisionMaps();
-            resolve();
-        }).then(() => {
             this.spawnNpcs();
             this.spawnScenery();
         });
@@ -218,11 +216,16 @@ export class World {
         }
 
         const position = new Position(newObject.x, newObject.y, newObject.level);
+        const chunk = this.chunkManager.getChunkForWorldPosition(position);
 
+        this.deleteAddedLocationObjectMarker(oldObject, position, chunk);
         this.addLocationObject(newObject, position);
 
         if(respawnTicks !== -1) {
-            schedule(respawnTicks).then(() => this.addLocationObject(oldObject, position));
+            schedule(respawnTicks).then(() => {
+                this.deleteAddedLocationObjectMarker(newObject as LocationObject, position, chunk);
+                this.addLocationObject(oldObject, position);
+            });
         }
     }
 
@@ -423,7 +426,7 @@ export class World {
 
         const spawnChunk = this.chunkManager.getChunkForWorldPosition(new Position(x, y, 0));
 
-        for(let i = 0; i < 990; i++) {
+        for(let i = 0; i < 1500; i++) {
             const player = new Player(null, null, null, i, `test${i}`, 'abs', true);
             this.registerPlayer(player);
             player.activeWidget = null;
@@ -448,6 +451,10 @@ export class World {
     }
 
     public async worldTick(): Promise<void> {
+        if(!this.ready) {
+            return;
+        }
+
         const hrStart = Date.now();
         const activePlayers: Player[] = this.playerList.filter(player => player !== null);
 
@@ -475,13 +482,18 @@ export class World {
         return Promise.resolve();
     }
 
-    public playerExists(player: Player): boolean {
-        const foundPlayer = this.playerList[player.worldIndex];
-        if(!foundPlayer) {
-            return false;
-        }
+    public playerOnline(player: Player | string): boolean {
+        if(typeof player === 'string') {
+            player = player.toLowerCase();
+            return this.playerList.findIndex(p => p !== null && p.username.toLowerCase() === player) !== -1;
+        } else {
+            const foundPlayer = this.playerList[player.worldIndex];
+            if(!foundPlayer) {
+                return false;
+            }
 
-        return foundPlayer.equals(player);
+            return foundPlayer.equals(player);
+        }
     }
 
     public registerPlayer(player: Player): boolean {
@@ -527,6 +539,10 @@ export class World {
     public deregisterNpc(npc: Npc): void {
         npc.exists = false;
         this.npcList[npc.worldIndex] = null;
+    }
+
+    public get ready(): boolean {
+        return this.chunkManager && this.chunkManager.complete;
     }
 
 }
