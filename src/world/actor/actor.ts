@@ -79,6 +79,7 @@ export abstract class Actor {
 
     public follow(target: Actor): void {
         this.face(target, false, false, false);
+        this.metadata['following'] = target;
 
         this.moveBehind(target);
         const subscription = target.movementEvent.subscribe(() => this.moveBehind(target));
@@ -89,18 +90,20 @@ export abstract class Actor {
         ).subscribe(() => {
             subscription.unsubscribe();
             this.face(null);
+            delete this.metadata['following'];
         });
     }
 
     public async walkTo(target: Actor): Promise<boolean> {
         const distance = Math.floor(this.position.distanceBetween(target.position));
+
+        if(distance <= 1) {
+            return false;
+        }
+        
         if(distance > 16) {
             this.clearFaceActor();
             this.metadata.faceActorClearedByWalking = true;
-            return false;
-        }
-
-        if(distance <= 1) {
             return false;
         }
 
@@ -171,11 +174,21 @@ export abstract class Actor {
         this.updateFlags.animation = animation;
     }
 
+    public stopAnimation(): void {
+        const animation = {id: -1, delay: 0};
+        this.updateFlags.animation = animation;
+    }
+
     public playGraphics(graphics: number | Graphic): void {
         if(typeof graphics === 'number') {
             graphics = {id: graphics, delay: 0, height: 120};
         }
 
+        this.updateFlags.graphics = graphics;
+    }
+
+    public stopGraphics(): void {
+        const graphics = {id: -1, delay: 0, height: 120};
         this.updateFlags.graphics = graphics;
     }
 
