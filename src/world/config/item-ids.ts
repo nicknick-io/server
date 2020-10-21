@@ -31,6 +31,7 @@ export const itemIds = {
     recruitmentDrive: {
         shears: 5603,
     },
+    hammer: 2347,
     kebab: 1971,
     coal: 453,
     tinOre: 438,
